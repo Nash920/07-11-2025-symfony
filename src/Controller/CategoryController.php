@@ -3,7 +3,6 @@
 // src/Controller/CategoryController.php
 namespace App\Controller;
 
-// ...
 use App\Entity\Category;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,22 +20,29 @@ class CategoryController extends AbstractController
         EntityManagerInterface $entityManager
     ): JsonResponse
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        /** @var \App\Entity\User $user */
+        // $user = $this->getUser();
 
-        $content = json_decode($request->getContent(), true);
+        $hasAccess = $this->isGranted('ROLE_ADMIN');
 
-        $category = new Category();
-        if(!isset($content['name'])) {
-            return new JsonResponse('champ name manquant', JsonResponse::HTTP_BAD_REQUEST);
+        if ($hasAccess) {
+            $content = json_decode($request->getContent(), true);
+
+            $category = new Category();
+            if(!isset($content['name'])) {
+                return new JsonResponse('champ name manquant', JsonResponse::HTTP_BAD_REQUEST);
+            }
+            $category->setName($content['name']);
+
+            // tell Doctrine you want to (eventually) save the Product (no queries yet)
+            $entityManager->persist($category);
+
+            // actually executes the queries (i.e. the INSERT query)
+            $entityManager->flush();
+
+            return new JsonResponse('Saved new category with id '.$category->getId());
+        } else {
+            return new JsonResponse("Vous n'avez pas les accès nécessaires", JsonResponse::HTTP_FORBIDDEN);
         }
-        $category->setName($content['name']);
-
-        // tell Doctrine you want to (eventually) save the Product (no queries yet)
-        $entityManager->persist($category);
-
-        // actually executes the queries (i.e. the INSERT query)
-        $entityManager->flush();
-
-        return new JsonResponse('Saved new category with id '.$category->getId());
     }
 }

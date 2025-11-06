@@ -16,14 +16,12 @@ security:
         main:
             #lazy: true
             #provider: app_user_provider
-            #pattern: ^/api/login
+            pattern: ^/api/login
             stateless: true
             json_login:
                 check_path: /api/login
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
-            logout:
-                path: /logout
 
         api_register:
             pattern:   ^/api/user/create
@@ -45,7 +43,8 @@ security:
     access_control:
         - { path: ^/api/user/create, roles: PUBLIC_ACCESS, methods: POST }
         - { path: ^/api/login, roles: PUBLIC_ACCESS , methods : POST}
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: '^/api/category/create', roles: [ROLE_ADMIN], methods: POST }
+        - { path: ^/api,       roles: [IS_AUTHENTICATED_FULLY] }
         # - { path: '^/category/create', roles: [IS_AUTHENTICATED_FULLY, ROLE_USER], methods: POST }
         # - { path: '^/product/create', roles: [PUBLIC_ACCESS], methods: POST }
         # - { path: ^/api/login, roles: [PUBLIC_ACCESS] }
